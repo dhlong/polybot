@@ -1,0 +1,4 @@
+{
+	"veteranKill" : 3,
+	"accelerator" : 4.5
+}

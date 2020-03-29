@@ -1,0 +1,31 @@
+{
+	"Farm" :
+	{
+		"population" : 1
+	},
+	"LumberHut" :
+	{
+		"population" : 1
+	},
+	"Windmill" :
+	{
+		"population" : 1,
+		"dependence"  : "Farm"
+	}
+	
+}{
+	"Farm" :
+	{
+		"population" : 1
+	},
+	"LumberHut" :
+	{
+		"population" : 1
+	},
+	"Windmill" :
+	{
+		"population" : 1,
+		"dependence"  : "Farm"
+	}
+	
+}

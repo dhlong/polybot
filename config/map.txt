@@ -1,0 +1,85 @@
+{
+	"resourceSpawns" :
+	[
+		{
+			"num" : [5,8],
+			"types" : ["Fruit", "Animal", "Crop", "Metal"]
+		},
+		{
+			"num" : [5,8],
+			"types" : ["Fruit", "Animal", "Crop", "Metal"]
+		},
+		{
+			"num" : [3,5],
+			"types" : ["Metal"]
+		}
+	]
+	,
+	"terrains" :
+	{
+		"Field" : 
+		{
+			"spawnRate"	: 50,
+			"movement" :
+			{
+				"cost" : 1
+			}
+		},
+		"Forest" :
+		{
+			"spawnRate"	: 30,
+			"movement" :
+			{
+				"cost" : 2
+			},
+			"defenceBonus" :
+			{
+				"ability" : "ForestDefence",
+				"value" : 1.5
+			}
+		},
+		"Mountain" :
+		{
+			"spawnRate"	: 20,
+			"movement" :
+			{
+				"block" : true,
+				"unblockTechnology" : "Climbing",
+				"cost" : 1
+			}
+		},
+		"Ice" :
+		{
+			"spawnRate"	: 0
+		}
+	},
+	"resources" :
+	{
+		"Fruit" :
+		{
+			"consumable" : true,
+			"terrain": "Field"
+		},
+		"Crop" :
+		{
+			"terrain": "Field",
+			"technology" : "Organization"
+		
+		},
+		"Animal" : 
+		{
+			"consumable" : true,
+			"terrain": "Forest"
+		},
+		"Fish" :
+		{
+			"consumable" : true,
+			"terrain": "Ice"
+		},
+		"Metal" : 
+		{
+			"terrain": "Mountain",
+			"technology" : "Climbing"
+		}
+	}
+}

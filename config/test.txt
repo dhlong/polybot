@@ -1,0 +1,103 @@
+{
+	"startAbilities" : ["Capture" , "WarriorUnit", "HarvestFruit"],
+  "startTechs" : ["Organization","Hunting","Climbing","Riding"],
+  "technologies": 
+  {
+    "Organization": {
+      "cost": 5,
+      "abilities": [
+        "HarvestFruit"
+      ],
+	  "childs" : ["Farming","Shields"]
+    },
+    "Farming": {
+      "cost": 6,
+	  "previewable" : true,
+      "abilities": [
+        "Farm"
+      ],
+	  "childs" : ["Construction"]
+    },
+	"Construction" :
+	{
+		"cost": 7,
+		  "previewable" : false,
+		  "abilities": [
+			"Windmill",
+			"Destroy"
+		  ]
+	},
+    "Shields": {
+      "cost": 6,
+	  "previewable" : true,
+      "abilities": [
+        "DefenderUnit"
+      ]
+    },
+    "Hunting": {
+      "cost": 5,
+	  "previewable" : true,
+      "abilities": [
+        "Hunting"
+      ],
+	  "childs" : ["Forestry","Archery"]
+    },
+    "Forestry": {
+      "cost": 6,
+      "abilities": [
+        "ClearForest",
+        "LumberHut"
+      ]
+    },
+    "Archery": {
+      "cost": 6,
+      "abilities": [
+        "ArcherUnit",
+        "ForestDefence"
+      ]
+    },
+    "Climbing": {
+      "cost": 5,
+      "abilities": [
+        "Movement"
+      ],
+	  "childs" : ["Mining","Meditation"]
+    },
+    "Mining": {
+      "cost": 6,
+	  "previewable" : true,
+      "abilities": [
+        "Mine"
+      ]
+    },
+    "Meditation": {
+      "cost": 6,
+      "abilities": [
+        "MountainTemple",
+        "MountainDefence",
+        "PacifistTask"
+      ]
+    },
+    "Riding": {
+      "cost": 5,
+      "abilities": [
+        "RiderUnit"
+      ],
+	  "childs" : ["Roads","FreeSpirit"]
+    },
+    "Roads": {
+      "name": "",
+      "cost": 6,
+      "abilities": [
+        "Farm"
+      ]
+    },
+    "FreeSpirit": {
+      "name": "",
+      "cost": 6,
+      "abilities": [
+        "DefenderUnit"
+      ]
+    }
+  }
+}

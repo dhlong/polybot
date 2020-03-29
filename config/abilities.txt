@@ -1,0 +1,72 @@
+{
+	"Hunting"  :
+	{
+		"type" : "Tile",
+		"population" : 1,
+		"cost" : 2
+	},
+	"HarvestFruit" :
+	{
+		"type" : "Tile",
+		"population" : 1,
+		"cost" : 2
+	},
+	"Farm" :
+	{
+		"type" : "Tile",
+		"cost" : 5
+	},
+	"Windmill" :
+	{
+		"type" : "Tile",
+		"cost" : 5,
+		"building" : "Windmill"
+	},
+	"ClearForest" :
+	{
+		"type" : "Tile",
+		"cost" : 5
+	},
+	"LumberHut" :
+	{
+		"type" : "Tile",
+		"cost" : 5
+	},
+	"Mine" :
+	{
+	},
+	"MountainTemple" :
+	{
+	},
+	"Destroy" :
+	{	
+		"type" : "Tile",
+		"cost" : 5
+	},
+	"Movement" : 
+	{
+		
+	},
+	"ForestDefence" :
+	{
+	},
+	"Capture" :
+	{
+		"type" : "Unit"
+	},
+	"WarriorUnit" :
+	{
+		"type" : "City",
+		"unit" : "Warrior"
+	},
+	"RiderUnit" :
+	{
+		"type" : "City",
+		"unit" : "Rider"
+	},
+	"ArcherUnit" :
+	{
+		"type" : "City",
+		"unit" : "Archer"
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"Dash" : 
+	{
+		"condition" : "MoveEnd",
+		"target" : "Self"
+	},
+	"Escape" :
+	{
+		"condition" : "AttackEnd",
+		"target" : "Self"
+	},
+	"Fortify" :
+	{
+		"condition" : "None",
+		"target" : "Self"
+	}
+}

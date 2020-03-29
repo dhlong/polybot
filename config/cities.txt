@@ -1,0 +1,20 @@
+{
+	"capitalExplorerRange" : 2,
+	"capicalStarBonus" : 1,
+	"star" : 1,
+	"population" : [2,3,4,5,6],
+
+	"rewards" :
+	[
+		[
+			{
+				"type" : "Star",
+				"value" : 10
+			},
+			{
+				"type" : "CityStar",
+				"value" : 2
+			}
+		]
+	]
+}
