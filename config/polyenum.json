@@ -1,0 +1,75 @@
+{
+	"Ability": [
+		"Capture",
+		"HarvestFruit",
+		"Hunting",
+		"Mine",
+		"Movement",
+		"Farm",
+		"Windmill",
+		"LumberHut",
+		"MountainTemple",
+		"MountainDefence",
+		"ClearForest",
+		"ForestDefence",
+		"Destroy",
+		"Disband",
+		"PacifistTask",
+		"WarriorUnit",
+		"RiderUnit",
+		"DefenderUnit",
+		"ArcherUnit"
+	],
+	"Technology": [	
+		"None",
+		"Organization",
+		"Farming",
+		"Construction",
+		"Shields",
+		"Hunting",
+		"Forestry",
+		"Archery",
+		"Climbing",
+		"Mining",
+		"Meditation",
+		"Riding",
+		"Roads",
+		"FreeSpirit"
+	],
+	"Terrain": [
+		"Field",
+		"Forest",
+		"Mountain",
+		"Water",
+		"Ice",
+		"Any"
+	],
+	"Resource": [
+		"None",
+		"Fruit",
+		"Crop",
+		"Animal",
+		"Metal",
+		"Fish",
+		"Any"
+	],
+	"Building": [
+		"None",
+		"Farm",
+		"LumberHut",
+		"Windmill",
+		"Any"
+	],
+	"ActionType": [
+		"EndTurn",
+		"ResearchTechnology",
+		"UpgradeCity",
+		"UnitMove",
+		"UnitAttack",
+		"UnitUpgrade",
+		"UnitAbility",
+		"TrainUnit",
+		"TileApplyAbility"
+	]
+}
+
