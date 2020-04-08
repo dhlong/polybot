@@ -70,6 +70,14 @@
 		"UnitAbility",
 		"TrainUnit",
 		"TileApplyAbility"
+	],
+	"Reward": [
+		"Star",
+		"CityStar",
+		"Explorer",
+		"DefCastle",
+		"Border",
+		"Population"
 	]
 }
 
