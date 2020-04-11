@@ -7,61 +7,107 @@ from itertools import combinations, chain, product
 import random
 import numpy as np
 import math
+import json
 
-Tile = namedtuple('Tile', 'x y')
-Village = namedtuple('Village', 'x y')
-Unit = namedlist('Unit', 'x y player level hp attack defence kill')
-City = namedlist('City', 'x y capital range player level pop trained')
-Resource = namedtuple('Resource', 'type x y')
-ResourceType = Enum('ResourceType', 'fruit animal null')
+data = {}
+for datafile in ['techTree', 'abilities', 'cities', 'units', 'unitSkills']:
+    with open('./config/{}.txt'.format(datafile), 'r') as f:
+        data[datafile] = json.load(f)
 
-org_tech = 'null organization shields farming construction'
-hunt_tech = 'hunting forestry archery mathematics'
-ride_tech = 'riding'
-climb_tech = 'climbing'
-all_tech = ' '.join([org_tech, hunt_tech, ride_tech, climb_tech])
-TechType = Enum('TechType', all_tech)
-Stage = Enum('Stage', 'tech resource train move attack capture end')
+tech_cost = {tech: tech_data['cost'] for tech, tech_data in data['techTree']['technologies'].items()}
+tech_dependence = {}
 
-next_stage = {
-    Stage.tech: Stage.resource,
-    Stage.resource: Stage.train,
-    Stage.train: Stage.move,
-    Stage.move: Stage.attack,
-    Stage.attack: Stage.capture,
-    Stage.capture: Stage.end,
-    Stage.end: Stage.tech
-}
+for tech in tech_cost:
+    try:
+        for child in data['techTree']['technologies'][tech]['childs']:
+            tech_dependence[child] = tech
+    except KeyError:
+        pass
 
-tech_cost = {
-    TechType.null: 0,
-    TechType.hunting: 2,
-    TechType.organization: 2,
-    TechType.farming: 5,
-    TechType.climbing: 5,
-    TechType.shields: 6,
-    TechType.construction: 7,
-    TechType.riding: 5,
-    TechType.forestry: 6,
-    TechType.archery: 6,
-    TechType.mathematics: 10
-}
+ability_dependence = {}
+for tech in tech_cost:
+    for a in data['techTree']['technologies'][tech]['abilities']:
+        ability_dependence[a] = tech
 
-tech_prerequisite = {
-    TechType.null: TechType.null,
-    TechType.organization: TechType.null,
-    TechType.hunting: TechType.null,
-    TechType.riding: TechType.null,
-    TechType.climbing: TechType.null,
-    TechType.shields: TechType.organization,
-    TechType.farming: TechType.organization,
-    TechType.construction: TechType.farming,
-    TechType.archery: TechType.hunting,
-    TechType.forestry: TechType.hunting,
-    TechType.mathematics: TechType.forestry
-}
+exit()
+
+TerrainType = Enum('Terrain', 'field forest mountain water ice any')
+ResourceType = Enum('Resource', 'none fruit crop animal metal fish any')
+BuildingType = Enum('Building', 'none farm lumber_hut windmill any')
+ActionType = Enum('Action', 'end research city_upgrade unit_move unit_attack unit_upgrade unit_ability' +
+                  ' unit_train tile_apply')
+
+Unit = namedlist('Unit', 'x y player city hp move_turn attack_turn kill veteran')
+Resource = namedtuple('Resource', 'x y type')
+City = namedlist('City', 'x y player capital level pop')
 
 city_points = [0, 100, 40, 35, 30, 25, 20, 15, 10, 5, 0]
+
+
+# NOTE:
+# 1. how rewarded affects the game
+# 2. any buildings?
+
+class GameState:
+    def __init__(self, data):
+        self.size = n = data['worldMap']['size']
+        self.n_players = len(data['players'])
+        self.cities = []
+        for c in data['cities']:
+            city = City(c['i'], c['j'],
+                        c['playerId'] - 1,
+                        c['isCapital'],
+                        c['level'],
+                        c['population'])
+            self.cities.append(city)
+
+        self.units = []
+        for u in data['units']:
+            unit = Unit(u['i'], u['j'],
+                        u['player'] - 1,
+                        u['city'] - 1,
+                        u['health'],
+                        u['moveTurn'],
+                        u['attachTurn'],
+                        u['kill'],
+                        u['veteran'])
+            self.units.append(unit)
+
+        self.terrain = [0] * (n**2)
+        self.resource = [0] * (n**2)
+        self.explored = [[False]*(n**2) for _ in range(self.n_players)]
+
+        for row in data['worldMap']['tiles']:
+            for tile in row:
+                i, j = tile['i'], tile['j']
+                idx = i*n+j
+                self.terrain[idx] = tile['terrain']
+                self.resource[idx] = tile['resource']
+                for player in tile['exploredPlayers']:
+                    self.explored[player][idx] = True
+
+        turn = [-1] * self.n_players
+
+        self.stars = [0] * self.n_players
+        self.has_tech = [[False] * len(tech_cost) for _ in range(self.n_players)]
+        for i, player in enumerate(data['players']):
+            self.stars[i] = player['star']
+            for tech in player['technologies']:
+                self.has_tech[i][tech - 1] = True
+            turn[i] = player['turn']
+
+        self.turn = max(range(self.n_players), key=turn.__getitem__)
+
+    def get_actions(self):
+        actions = []
+
+        player = self.turn
+
+        # research
+        for tech, has_tech in enumerate(self.has_tech[player]):
+            if not has_tech and tech_cost[tech]:
+                actions.append((ActionType.research, tech))
+
 
 
 def tech_tier(tech):
@@ -153,6 +199,12 @@ class GameState:
         self.tech = [{TechType.null, TechType.hunting}, {TechType.null, TechType.organization}]
         self.stage = Stage.tech
         self.actions = None
+
+    def __init__(self, game_data):
+        self.size = game_data['worldMap']['size']
+        for i, row in enumerate(game_data['tiles']):
+            for j, tile in enumerate(row):
+                pass
 
     def inc_pop(self, city, delta):
         city.pop += delta

@@ -1,102 +1,95 @@
-from __future__ import division
+from polygame import GameState
+from polynet import  PolyNet
 
-import time
-import math
-import random
+class AlphaZeroConfig(object):
+
+    def __init__(self, json_file):
+        ### Self-Play
+        self.num_actors = 5000
+
+        self.num_sampling_moves = 30
+        self.max_moves = 512  # for chess and shogi, 722 for Go.
+        self.num_simulations = 800
+
+        # Root prior exploration noise.
+        self.root_dirichlet_alpha = 0.3  # for chess, 0.03 for Go and 0.15 for shogi.
+        self.root_exploration_fraction = 0.25
+
+        # UCB formula
+        self.pb_c_base = 19652
+        self.pb_c_init = 1.25
+
+        ### Training
+        self.training_steps = int(700e3)
+        self.checkpoint_interval = int(1e3)
+        self.window_size = int(1e6)
+        self.batch_size = 4096
+
+        self.weight_decay = 1e-4
+        self.momentum = 0.9
+        # Schedule for chess and shogi, Go starts at 2e-2 immediately.
+        self.learning_rate_schedule = {
+            0: 2e-1,
+            100e3: 2e-2,
+            300e3: 2e-3,
+            500e3: 2e-4
+        }
+
+        self.json_file = json_file
 
 
-def random_policy(state):
-    while not state.is_terminal():
-        try:
-            action = random.choice(state.get_possible_actions())
-        except IndexError:
-            raise Exception("Non-terminal state has no possible actions: " + str(state))
-        state = state.take_action(action)
-    return state.get_reward()
+class Node(object):
 
-
-class TreeNode:
-    def __init__(self, state, parent):
-        self.state = state
-        self.is_terminal = state.is_terminal()
-        self.is_fully_expanded = self.is_terminal
-        self.parent = parent
-        self.num_visits = 0
-        self.total_reward = 0
+    def __init__(self, prior: float):
+        self.visit_count = 0
+        self.to_play = -1
+        self.prior = prior
+        self.value_sum = 0
         self.children = {}
 
+    def expanded(self):
+        return len(self.children) > 0
 
-def expand(node):
-    actions = node.state.get_possible_actions()
-    for action in actions:
-        if action not in node.children:
-            new_node = TreeNode(node.state.take_action(action), node)
-            node.children[action] = new_node
-            if len(actions) == len(node.children):
-                node.is_fully_expanded = True
-            return new_node
-
-    raise Exception("Should never reach here")
+    def value(self):
+        if self.visit_count == 0:
+            return 0
+        return self.value_sum / self.visit_count
 
 
-def back_propagate(node, reward):
-    while node is not None:
-        node.num_visits += 1
-        node.total_reward += reward
-        node = node.parent
+class ReplayBuffer(object):
+
+    def __init__(self, config: AlphaZeroConfig):
+        self.window_size = config.window_size
+        self.batch_size = config.batch_size
+        self.buffer = []
+
+    def save_game(self, game):
+        if len(self.buffer) > self.window_size:
+            self.buffer.pop(0)
+        self.buffer.append(game)
+
+    def sample_batch(self):
+        # Sample uniformly across positions.
+        move_sum = float(sum(len(g.history) for g in self.buffer))
+        games = np.random.choice(
+            self.buffer,
+            size=self.batch_size,
+            p=[len(g.history) / move_sum for g in self.buffer])
+        game_pos = [(g, np.random.randint(len(g.history))) for g in games]
+        return [(g.make_image(i), g.make_target(i)) for (g, i) in game_pos]
 
 
-def get_best_child(node, exploration_value):
-    best_value = float("-inf")
-    best_nodes = []
-    for child in node.children.values():
-        node_value = child.total_reward / child.num_visits + exploration_value * math.sqrt(
-            2 * math.log(node.num_visits) / child.num_visits)
-        if node_value > best_value:
-            best_value = node_value
-            best_nodes = [child]
-        elif node_value == best_value:
-            best_nodes.append(child)
-    return random.choice(best_nodes)
+class SharedStorage(object):
 
+    def __init__(self):
+        self._networks = {0:PolyNet().get_weights()}
 
-def get_action(root, best_child):
-    for action, node in root.children.items():
-        if node is best_child:
-            return action
-
-
-class MCTS:
-    def __init__(self, time_limit=None, iteration_limit=None, exploration_constant=1 / math.sqrt(2),
-                 rollout_policy=random_policy):
-        if (time_limit is not None) and (iteration_limit is not None):
-            raise ValueError("Cannot have both a time limit and an iteration limit")
-        self.limit_type = 'time' if time_limit is not None else 'iterations'
-        self.time_limit = time_limit
-        self.search_limit = iteration_limit
-        self.exploration_constant = exploration_constant
-        self.rollout = rollout_policy
-
-    def search(self, initial_state):
-        self.root = TreeNode(initial_state, None)
-
-        if self.limit_type == 'time':
-            time_limit = time.time() + self.time_limit / 1000
-            while time.time() < time_limit:
-                self.execute_round()
+    def latest_network(self):
+        if self._networks:
+            return self._networks[max(self._networks.keys())]
         else:
-            for i in range(self.search_limit):
-                self.execute_round()
+            return PolyNet().get_weights()  # policy -> uniform, value -> 0.5
 
-        best_child = get_best_child(self.root, 0)
-        return get_action(self.root, best_child)
+    def save_network(self, step: int, network: PolyNet):
+        self._networks[step] = network.get_weights()
 
-    def execute_round(self):
-        node = self.select_node(self.root)
-        reward = self.rollout(node.state)
-        back_propagate(node, reward)
-
-    def select_node(self, node):
-        while not node.is_terminal:
-            node = get_best_child(node, self.exploration_constant) if node.is_fully_expanded else expand(node)
-        return node
